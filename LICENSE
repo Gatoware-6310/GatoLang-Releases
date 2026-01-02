@@ -1,0 +1,19 @@
+GatoLang Compiler License (Proprietary)
+
+Copyright (c) 2026 Gatoware
+
+Permission is granted to use the GatoLang compiler ("gatoc") for personal,
+educational, and commercial software development.
+
+You may:
+- Use gatoc to compile and run GatoLang programs
+- Distribute programs produced by gatoc
+
+You may NOT:
+- Redistribute gatoc or its binaries
+- Modify, reverse engineer, decompile, or disassemble gatoc
+- Sell, sublicense, or repackage gatoc
+- Claim gatoc or GatoLang as your own work
+
+This software is provided "as is", without warranty of any kind.
+The author is not liable for any damages arising from the use of this software.
