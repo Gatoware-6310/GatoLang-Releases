@@ -24,9 +24,14 @@ set "WRAPPER=%BIN_DIR%\gatoc.cmd"
 ) > "%WRAPPER%"
 
 echo Installed gatoc to %DEST_DIR%\gatoc.jar
-if "%PATH%"=="" goto :pathmsg
+call :addpath "%BIN_DIR%"
+goto :eof
+
+:addpath
+set "TARGET=%~1"
 set "PATHCHECK=%PATH%;"
-set "BINCHK=%BIN_DIR%;"
-if not "%PATHCHECK:%BINCHK%=%"=="%PATHCHECK%" goto :eof
-:pathmsg
-echo Add %BIN_DIR% to your PATH to run 'gatoc'
+set "BINCHK=%TARGET%;"
+if not "%PATHCHECK:%BINCHK%=%"=="%PATHCHECK%" exit /b 0
+powershell -NoProfile -Command "$bin='%TARGET%'; $paths=[Environment]::GetEnvironmentVariable('Path','User'); if($paths -and ($paths.Split(';') -contains $bin)){exit 0} $new=if($paths){$paths.TrimEnd(';')+';'+$bin}else{$bin}; [Environment]::SetEnvironmentVariable('Path',$new,'User')"
+echo Added %TARGET% to PATH. Open a new terminal to use 'gatoc'.
+exit /b 0

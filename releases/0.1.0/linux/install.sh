@@ -41,3 +41,30 @@ WRAP
 fi
 
 echo "Installed gatoc to $JAR_DST"
+
+add_path_user() {
+  local marker="# Added by GatoLang installer"
+  local line="export PATH=\"$BIN_DIR:\$PATH\""
+  local file
+  for file in "$HOME/.profile" "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if [[ -f "$file" || "$file" == "$HOME/.profile" ]]; then
+      if ! grep -Fqs "$BIN_DIR" "$file"; then
+        printf '\n%s\n%s\n' "$marker" "$line" >>"$file"
+      fi
+    fi
+  done
+}
+
+if [[ "$NEED_SUDO" -eq 1 ]]; then
+  sudo tee /etc/profile.d/gatoc.sh >/dev/null <<PROFILE
+# Added by GatoLang installer
+case ":\$PATH:" in
+  *":$BIN_DIR:"*) ;;
+  *) export PATH="$BIN_DIR:\$PATH" ;;
+esac
+PROFILE
+  echo "Added $BIN_DIR to PATH for all users. Open a new terminal to use 'gatoc'."
+else
+  add_path_user
+  echo "Added $BIN_DIR to PATH in your shell profiles. Open a new terminal to use 'gatoc'."
+fi

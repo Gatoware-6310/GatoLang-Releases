@@ -29,6 +29,15 @@ WRAP
 chmod 755 "$WRAPPER_DST"
 
 echo "Installed gatoc to $JAR_DST"
-if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-  echo "Add $BIN_DIR to your PATH to run 'gatoc'"
-fi
+
+marker="# Added by GatoLang installer"
+line="export PATH=\"$BIN_DIR:\$PATH\""
+for file in "$HOME/.profile" "$HOME/.bashrc" "$HOME/.zshrc"; do
+  if [[ -f "$file" || "$file" == "$HOME/.profile" ]]; then
+    if ! grep -Fqs "$BIN_DIR" "$file"; then
+      printf '\n%s\n%s\n' "$marker" "$line" >>"$file"
+    fi
+  fi
+done
+
+echo "Added $BIN_DIR to PATH in your shell profiles. Open a new terminal to use 'gatoc'."
