@@ -8,16 +8,17 @@ The compiler is **closed source**. You are free to use it to build and distribut
 
 ## What is GatoLang?
 
-GatoLang is a small, Java-like programming language compiled by `gatoc` into native executables via a C backend.  
+GatoLang is a small, simple, and fast Java-like programming language compiled by `gatoc` into native executables via a C backend.  
 It is designed to be simple, explicit, and low-level where it matters, while still feeling familiar.
 
 - Statically typed
 - No type inference
 - No for-loops (custom loop constructs instead)
-- Designed and implemented by **Ammar Adil**
+- Designed and implemented by **Gatoware**
 
 The **language specification and tooling (VS Code extension)** are public.  
-The **compiler implementation is proprietary**.
+The **compiler implementation is closed-source**.
+See GatoLang documentation in the GATOLANG-DOCS.md file in this repo.
 
 ---
 
@@ -41,10 +42,6 @@ Example layout:
 └── windows.zip
 
 ````
-
-> ⚠️ Only the **obfuscated jar** is shipped and used.  
-> There is no unobfuscated compiler binary in the release.
-
 ---
 
 ## Requirements
@@ -143,20 +140,6 @@ gatoc hello.gw --run
 
 ---
 
-## Notes on GitHub Releases
-
-Nothing inside this repository is published automatically.
-
-For files to appear on the **GitHub Releases page**, you must:
-
-1. Create a Git tag (e.g. `v0.1.0`)
-2. Create a GitHub Release for that tag
-3. Upload `linux.zip` and `windows.zip` as **release assets**
-
-Only uploaded assets appear on the Releases page — repository files do not.
-
----
-
 ## License
 
 `gatoc` is proprietary software.
@@ -184,6 +167,6 @@ See the LICENSE file for full terms.
 
 ---
 
-**GatoLang © Ammar Adil**
+**GatoLang © Gatoware**
 
 ```
