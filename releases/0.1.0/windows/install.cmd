@@ -19,13 +19,13 @@ set "BIN_DIR=%SYS_BIN%"
 
 mkdir "%SYS_DIR%" 2>nul
 mkdir "%SYS_BIN%" 2>nul
-copy /y "%SRC_JAR%" "%SYS_DIR%\gatoc.jar" >nul
+copy /y "%SRC_JAR%" "%SYS_DIR%\gatoc.jar" >nul 2>nul
 if errorlevel 1 (
   set "DEST_DIR=%USER_DIR%"
   set "BIN_DIR=%USER_BIN%"
   mkdir "%USER_DIR%" 2>nul
   mkdir "%USER_BIN%" 2>nul
-  copy /y "%SRC_JAR%" "%USER_DIR%\gatoc.jar" >nul
+  copy /y "%SRC_JAR%" "%USER_DIR%\gatoc.jar" >nul 2>nul
 )
 
 set "WRAPPER=%BIN_DIR%\gatoc.cmd"
@@ -40,9 +40,12 @@ goto :eof
 
 :addpath
 set "TARGET=%~1"
-set "PATHCHECK=%PATH%;"
-set "BINCHK=%TARGET%;"
-if not "%PATHCHECK:%BINCHK%=%"=="%PATHCHECK%" exit /b 0
-powershell -NoProfile -Command "$bin='%TARGET%'; $paths=[Environment]::GetEnvironmentVariable('Path','Machine'); if($paths -and ($paths.Split(';') -contains $bin)){exit 0} $new=if($paths){$paths.TrimEnd(';')+';'+$bin}else{$bin}; try{[Environment]::SetEnvironmentVariable('Path',$new,'Machine'); exit 0} catch {[Environment]::SetEnvironmentVariable('Path',$new,'User'); exit 0}"
+set "PS=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+if not exist "%PS%" set "PS=powershell"
+"%PS%" -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $bin='%TARGET%'; $paths=[Environment]::GetEnvironmentVariable('Path','Machine'); if($paths -and ($paths.Split(';') -contains $bin)){exit 0} $new=if($paths){$paths.TrimEnd(';')+';'+$bin}else{$bin}; try{[Environment]::SetEnvironmentVariable('Path',$new,'Machine'); exit 0} catch { $paths=[Environment]::GetEnvironmentVariable('Path','User'); if($paths -and ($paths.Split(';') -contains $bin)){exit 0} $new=if($paths){$paths.TrimEnd(';')+';'+$bin}else{$bin}; [Environment]::SetEnvironmentVariable('Path',$new,'User'); exit 0 }"
+if errorlevel 1 (
+  echo Failed to update PATH. Add %TARGET% manually.
+  exit /b 1
+)
 echo Added %TARGET% to PATH. Open a new terminal to use 'gatoc'.
 exit /b 0
