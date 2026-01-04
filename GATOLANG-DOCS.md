@@ -78,6 +78,51 @@ If multiple imported files introduce the same class name, compilation fails with
 
 ---
 
+## Packages and gatolib.json
+
+When an import uses a dotted path (for example, `import graphics.Graphics;`), the first path segment is treated as a package folder. If the import starts with `GATOLIBS.*`, the following package will be searched for in your GatoLang home directory.
+Your GatoLang home directory is by default located in `%LOCALAPPDATA%\GatoLang` for windows, and `~/.local/share/gatolang` for Linux.
+
+If `<package>/gatolib.json` exists, `gatoc` loads its metadata and uses it to add include paths, libraries, and platform-specific linker flags. Missing native dependencies surface a friendly OS-specific message (or a package-provided one).
+
+`gatolib.json` format:
+
+```json
+{
+  "name": "graphics",
+  "version": "0.1.0",
+  "message_on_missing": {
+    "linux": "...",
+    "windows": "...",
+    "macos": "..."
+  },
+  "other_paths": ["native", "/opt/libs"],
+  "platform": {
+    "linux": {
+      "pkg_config": ["sdl2"],
+      "cflags": [],
+      "ldflags": []
+    },
+    "windows": {
+      "include_dirs": ["native/windows/include"],
+      "lib_dirs": ["native/windows/lib"],
+      "libs": ["SDL2", "SDL2main"],
+      "dlls": ["native/windows/bin/SDL2.dll"]
+    },
+    "macos": {
+      "pkg_config": ["sdl2"]
+    }
+  }
+}
+```
+
+Notes:
+- Paths are relative to the package directory unless absolute.
+- If a path doesn’t exist, each entry in `other_paths` is tried.
+- Windows `dlls` are copied next to the output executable.
+
+---
+
 ## Lexical structure
 
 ### Comments
@@ -93,7 +138,7 @@ Examples: `foo`, `_count`, `value2`
 ```
 import class new return if else while loop break final
 true false
-void int float bool string
+void int float boolean bool string
 ```
 
 ### Literals
@@ -109,9 +154,9 @@ void int float bool string
 Built-in types:
 - `int` (64-bit signed integer)
 - `float` (double precision)
-- `bool`
+- `boolean` (alias: `bool`)
 - `string`
-- Arrays: `int[]`, `float[]`, `bool[]`, `string[]`
+- Arrays: `int[]`, `float[]`, `boolean[]`/`bool[]`, `string[]`
 - `void` (function return type only)
 
 ---
@@ -123,7 +168,7 @@ Variables require an explicit type and initializer (except top-level globals, wh
 ```gw
 int n = 10;
 string name = "cat";
-bool ok = true;
+boolean ok = true;
 ```
 
 Use `final` for read-only variables:
@@ -193,6 +238,40 @@ Instances created with `new` are fully isolated from other instances.
 
 ---
 
+## Native C integration
+
+Native C blocks are allowed **only inside class bodies** and **inside native methods**.
+
+Class-level raw C blocks:
+- `@header { ... }` emits raw C code near the top of the generated C file (before prototypes).
+- `@global { ... }` emits raw C code after headers.
+
+Native methods:
+- `@void name(params...) { ... }`
+- `@int name(params...) { ... }`
+- `@float name(params...) { ... }`
+- `@boolean name(params...) { ... }`
+- `@string name(params...) { ... }`
+
+Inline C blocks inside native methods:
+- `@{ ... }` emits raw C statements verbatim (wrapped in braces).
+- Inline blocks share scope with locals and parameters.
+- Inline C is ignored by the analyzer; only the GatoLang statements and signature are typechecked.
+
+Example:
+
+```gw
+class NativeC {
+  @int example() {
+    int j = 0;
+    @{ j += 5; }
+    return j;
+  }
+}
+```
+
+---
+
 ## Control flow
 
 ### `if` / `else`
@@ -205,7 +284,7 @@ if (x > 0) {
 }
 ```
 
-Condition expressions must be `bool`. No truthiness exists.
+Condition expressions must be `boolean`. No truthiness exists.
 
 ### `while`
 
@@ -217,7 +296,7 @@ while (i < 3) {
 }
 ```
 
-Condition expressions must be `bool`.
+Condition expressions must be `boolean`.
 
 ### `loop`
 
@@ -291,9 +370,9 @@ float y = float(a) / float(b);
 
 ## Booleans
 
-- `!`, `&&`, `||` work on `bool`.
-- Equality `==`/`!=` works on `bool`.
-- Conditions in `if`/`while` must be `bool`.
+- `!`, `&&`, `||` work on `boolean`.
+- Equality `==`/`!=` works on `boolean`.
+- Conditions in `if`/`while` must be `boolean`.
 
 ---
 
@@ -386,11 +465,11 @@ Arrays are reference-like handles:
 - `sleep(ms)` -> `void`
 - `args()` -> `string[]`
 - `env(name)` -> `string`
-- `hasEnv(name)` -> `bool`
+- `hasEnv(name)` -> `boolean`
 - `currentTimeMs()` -> `int`
 - `readFile(path)` -> `string`
 - `writeFile(path, data)` -> `void`
-- `fileExists(path)` -> `bool`
+- `fileExists(path)` -> `boolean`
 - `httpGet(url)` -> `string[]`
 - `httpPost(url, body)` -> `string[]`
 
