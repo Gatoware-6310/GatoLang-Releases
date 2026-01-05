@@ -49,6 +49,7 @@ Example layout:
 - **Java 17** (required)
 - Linux or Windows
 - A C compiler (`gcc` or `clang`) available on PATH for native builds
+- libcurl or WinHTTP (required to compile)
 
 Verify Java:
 ```bash
