@@ -260,6 +260,7 @@ Inline C statement blocks:
 - `@{ ... }` emits raw C statements verbatim (wrapped in braces).
 - Inline C can appear anywhere a statement is allowed, including entry file top-level statements.
 - Inline C is ignored by the analyzer; only the GatoLang statements and signature are typechecked.
+- Inside native C blocks, `string` parameters are automatically exposed as C strings (equivalent to `gato_cstr(param)`), so `printf("%s", s)` works.
 
 Example (top-level header + inline C statement):
 
@@ -278,7 +279,9 @@ Example (top-level native function, file-local):
 
 ```gw
 @void printSomething() { @{ puts("hello, world!"); } }
+@void printString(string s) { @{ printf("%s", s); } }
 printSomething();
+printString("native string");
 ```
 
 Example (implicit `int` to `float`):
