@@ -156,8 +156,9 @@ Built-in types:
 - `float` (double precision)
 - `boolean` (alias: `bool`)
 - `string`
-- Arrays: `int[]`, `float[]`, `boolean[]`/`bool[]`, `string[]`
+- Arrays: `int[]`, `float[]`, `boolean[]`/`bool[]`, `string[]`, `ClassName[]`
 - `void` (function return type only)
+- `int` values can be used where `float` is expected.
 
 ---
 
@@ -196,8 +197,9 @@ Rules:
 - Functions cannot be nested inside blocks.
 - `void` functions may use `return;` but not `return expr;`.
 - Non-`void` functions must return a value.
+- `int` values are implicitly converted to `float` when needed (arguments, returns, assignments, array elements).
 
-Top-level functions are visible across all loaded files (including imports).
+Top-level functions are file-local and are not callable from other files (including imports). Put shared code inside a class to export it.
 
 ---
 
@@ -240,25 +242,53 @@ Instances created with `new` are fully isolated from other instances.
 
 ## Native C integration
 
-Native C blocks are allowed **only inside class bodies** and **inside native methods**.
+Native C blocks are allowed at top-level and inside class bodies.
 
-Class-level raw C blocks:
+Raw C blocks:
 - `@header { ... }` emits raw C code near the top of the generated C file (before prototypes).
 - `@global { ... }` emits raw C code after headers.
 
-Native methods:
+Native functions and methods:
 - `@void name(params...) { ... }`
 - `@int name(params...) { ... }`
 - `@float name(params...) { ... }`
 - `@boolean name(params...) { ... }`
 - `@string name(params...) { ... }`
+- Top-level native functions are allowed but file-local (not callable from other files).
 
-Inline C blocks inside native methods:
+Inline C statement blocks:
 - `@{ ... }` emits raw C statements verbatim (wrapped in braces).
-- Inline blocks share scope with locals and parameters.
+- Inline C can appear anywhere a statement is allowed, including entry file top-level statements.
 - Inline C is ignored by the analyzer; only the GatoLang statements and signature are typechecked.
 
-Example:
+Example (top-level header + inline C statement):
+
+```gw
+print("hello!");
+@header { #include <math.h> }
+{
+  float x = 50;
+  float y = 0;
+  @{ y = sqrt(x); }
+  print(y);
+}
+```
+
+Example (top-level native function, file-local):
+
+```gw
+@void printSomething() { @{ puts("hello, world!"); } }
+printSomething();
+```
+
+Example (implicit `int` to `float`):
+
+```gw
+float returnFloat(float f) { return f; }
+float v = returnFloat(5);
+```
+
+Example (class method):
 
 ```gw
 class NativeC {
@@ -417,6 +447,15 @@ int[] nums = [1, 2, 3];
 string[] names = ["a", "b"];
 ```
 
+Arrays can hold class references:
+
+```gw
+class Foo { int v = 7; }
+Foo[] arr = [];
+arr.append(new Foo);
+print(arr[0].v);
+```
+
 Empty literals are allowed only when the element type is known from context:
 
 ```gw
@@ -443,6 +482,7 @@ Rules:
 - Empty literals require a known array type from context.
 - `length` is read-only.
 - `remove(index)` removes and returns the element at index.
+- `int` values are implicitly converted to `float` for `float[]` arrays.
 
 ### Array aliasing behavior (defined)
 
@@ -480,9 +520,10 @@ Memory: GatoLang uses a generational GC (young copying + old mark-sweep); alloca
 ## Errors and restrictions
 
 - Variables must be declared before use.
-- Top-level globals are accessible from any function and across imports, regardless of order.
+- Top-level globals are file-local and accessible from any function in the same file, regardless of order.
 - Types are strict; implicit conversions are limited.
-- Global initializers may reference other globals; cyclic initialization is a compile-time error.
+- Implicit conversions are limited to `int` -> `float`.
+- Global initializers may reference other globals in the same file; cyclic initialization is a compile-time error.
 - `return` only inside functions.
 - `break` only inside `while` and `loop`.
 - Empty array literals require a known array type.
