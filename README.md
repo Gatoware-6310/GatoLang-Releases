@@ -1,123 +1,108 @@
 # GatoLang Releases
 
-This repository contains **binary-only releases** of the **GatoLang compiler (`gatoc`)**.
+This repository contains binary releases of the GatoLang compiler, `gatoc`.
 
-The compiler is **closed source**. You are free to use it to build and distribute programs written in GatoLang, but redistribution or modification of the compiler itself is not permitted (see LICENSE).
+The compiler is closed source. You may use it to build and distribute programs written in GatoLang, but redistribution or modification of the compiler itself is not permitted. See `LICENSE`.
 
----
+## Current Release
+
+Current version: `0.3.0`
+
+GatoLang `0.3.0` is a major performance and multithreading release:
+
+- ID-based multithreading with `subroutine`, `.start(...)`, `Threads.join(id)`, `Threads.stop(id)`, `Threads.running(id)`, `Threads.done(id)`, `Threads.shouldStop()`, and `Threads.current()`.
+- Cooperative thread stopping with low-overhead stop checks.
+- Per-thread GC roots for threaded execution.
+- Raw primitive-buffer lowering and shared read-only primitive array hot-loop optimizations.
+- Scalar replacement and tighter generated C for arrays, strings, classes, loops, and calls.
+- Obfuscated release jars.
+- Benchmarks against C, Python, and Java.
+
+Release files:
+
+```text
+releases/0.3.0/
++-- README.md
++-- SHA256SUMS
++-- linux.zip
++-- linux/
+|   +-- gatoc.jar
+|   +-- install.sh
+|   +-- install-user.sh
++-- windows.zip
++-- windows/
+    +-- gatoc.jar
+    +-- install.cmd
+    +-- install-user.cmd
+```
 
 ## What is GatoLang?
 
-GatoLang is a small, simple, and fast Java-like programming language compiled by `gatoc` into native executables via a C backend.  
-It is designed to be simple, explicit, and low-level where it matters, while still feeling familiar.
+GatoLang is a small, simple, Java-like programming language compiled by `gatoc` into native executables through a C backend. It is designed to stay explicit and approachable while producing fast native code.
 
 - Statically typed
-- No type inference
-- No for-loops (custom loop constructs instead)
-- Designed and implemented by **Gatoware**
+- Explicit declarations, no type inference
+- Native executables through generated C
+- Growable arrays, strings, classes, functions, native C integration, file I/O, HTTP helpers, and threading
+- Designed and implemented by Gatoware
 
-The **language specification and tooling (VS Code extension)** are public.  
-The **compiler implementation is closed-source**.
-See GatoLang documentation in the GATOLANG-DOCS.md file in this repo.
-
----
-
-## Contents of a Release
-
-Each versioned release contains **prebuilt, obfuscated binaries** and install scripts.
-
-Example layout:
-```
-
-0.1.0/
-├── linux/
-│   ├── gatoc-obf.jar
-│   ├── install.sh
-│   └── install-user.sh
-├── windows/
-│   ├── gatoc-obf.jar
-│   ├── install.cmd
-│   └── install-user.cmd
-├── linux.zip
-└── windows.zip
-
-````
----
+The language documentation is included in `GATOLANG-DOCS.md`.
 
 ## Requirements
 
-- **Java 17** (required)
+- Java 17
 - Linux or Windows
-- A C compiler (`gcc` or `clang`) available on PATH for native builds
-- libcurl or WinHTTP (required to compile)
+- A C compiler on `PATH` for native builds, such as `gcc` or `clang`
+- libcurl on Linux for HTTP helpers; Windows builds use WinHTTP
 
 Verify Java:
+
 ```bash
 java --version
-````
-
----
+```
 
 ## Installation
 
-### Linux (recommended)
+Download the zip for your platform from `releases/0.3.0`.
 
-#### System-wide install (requires sudo)
+### Linux
+
+System install:
 
 ```bash
+cd releases/0.3.0
 sudo bash linux/install.sh
 ```
 
-Installs:
-
-* Compiler: `/usr/local/lib/gatoc/gatoc.jar`
-* Command: `/usr/local/bin/gatoc`
-
-#### User-only install (no sudo)
+User install:
 
 ```bash
+cd releases/0.3.0
 bash linux/install-user.sh
 ```
 
-Installs to:
+The user install places files under:
 
-* `~/.local/lib/gatoc/gatoc.jar`
-* `~/.local/bin/gatoc`
-
-If `~/.local/bin` is not on your PATH, the script will tell you how to add it.
-
----
+- `~/.local/lib/gatoc/gatoc.jar`
+- `~/.local/bin/gatoc`
 
 ### Windows
 
-#### User install (recommended)
+User install:
 
-Run:
-
-```
+```cmd
+cd releases\0.3.0
 windows\install-user.cmd
 ```
 
-Installs to:
+System install, with user fallback:
 
-* `%LOCALAPPDATA%\GatoLang\gatoc.jar`
-* `%LOCALAPPDATA%\GatoLang\bin\gatoc.cmd`
-
-You will be prompted to add the bin folder to PATH manually.
-
-#### System install (with fallback)
-
-Run:
-
-```
+```cmd
+cd releases\0.3.0
 windows\install.cmd
 ```
 
-Attempts installation under `Program Files`, and falls back to `%LOCALAPPDATA%` if permissions are insufficient.
-
----
-
-## Verifying the Installation
+## Verify
 
 After installation:
 
@@ -125,21 +110,61 @@ After installation:
 gatoc --help
 ```
 
-You should see the compiler help output.
-
-Test with a simple program:
+Compile and run a simple program:
 
 ```gw
 print("Hello, GatoLang!");
 ```
 
-Compile and run:
-
 ```bash
 gatoc hello.gw --run
 ```
 
----
+## v0.3.0 Benchmark Snapshot
+
+Measured on the release preparation machine with GatoLang `-O3 --native --lto`. Times vary by hardware.
+
+| Workload | GatoLang | C | Python | Java |
+|---|---:|---:|---:|---:|
+| loops_numeric | 48ms | 49ms | 3094ms | 49ms |
+| function_calls | 39ms | 42ms | 1636ms | 37ms |
+| arrays_append | 16ms | 14ms | 335ms | 10ms |
+| string_concat | 19ms | 0ms measured | 4265ms | 1ms |
+| thread_overhead | 35ms | 24ms | 74ms | 81ms |
+| class_access | 14ms | 10ms | 933ms | 8ms |
+| event_scheduler | 11ms | 9ms | 417ms | 9ms |
+| state_machine | 22ms | 16ms | 2166ms | 27ms |
+
+Black MIDI/event-processing benchmarks:
+
+| Workload | Runtime | Setup | Hot Loop | Events/sec | Hot Events/sec |
+|---|---:|---:|---:|---:|---:|
+| GatoLang black_midi | 434ms | 282ms | 102ms | 46.08M | 196.08M |
+| C black_midi | 366ms | 240ms | 101ms | 54.64M | 198.02M |
+| Python black_midi | 11503ms | 6078ms | 4884ms | 1.74M | 4.10M |
+| Java black_midi | 413ms | 257ms | 155ms | 48.43M | 129.03M |
+| GatoLang parallel | 33ms | 0ms | 26ms | 606.06M | 769.23M |
+| C parallel | 21ms | 0ms | 21ms | 952.38M | 952.38M |
+| Python parallel | 8477ms | 0ms | 8477ms | 2.36M | 2.36M |
+| Java parallel | 44ms | 0ms | 44ms | 454.55M | 454.55M |
+| GatoLang shared parallel | 500ms | 339ms | 117ms | 40.00M | 170.94M |
+| C shared parallel | 334ms | 243ms | 64ms | 59.88M | 312.50M |
+| Python shared parallel | 12065ms | 6205ms | 5306ms | 1.66M | 3.77M |
+| Java shared parallel | 317ms | 241ms | 75ms | 63.09M | 266.67M |
+
+## Checksums
+
+Release checksums are in:
+
+```text
+releases/0.3.0/SHA256SUMS
+```
+
+Verify from the release directory:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ## License
 
@@ -147,27 +172,21 @@ gatoc hello.gw --run
 
 You may:
 
-* Use the compiler
-* Distribute programs produced by the compiler
+- Use the compiler
+- Distribute programs produced by the compiler
 
 You may not:
 
-* Redistribute the compiler
-* Reverse engineer or decompile it
-* Modify or repackage it
+- Redistribute the compiler except through official Gatoware release channels
+- Reverse engineer or decompile it
+- Modify or repackage it
 
-See the LICENSE file for full terms.
+See `LICENSE` for full terms.
 
----
+## Support and Links
 
-## Support & Links
+- Documentation: `GATOLANG-DOCS.md`
+- Release packages: `releases/<version>/`
+- VS Code extension: available on the VS Code Marketplace
 
-* VS Code extension: available on the VS Code Marketplace
-* Documentation: see the GatoLang docs repository
-* Issues: report problems in the appropriate public issue tracker
-
----
-
-**GatoLang © Gatoware**
-
-```
+GatoLang (c) Gatoware

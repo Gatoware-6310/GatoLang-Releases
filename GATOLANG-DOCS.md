@@ -136,7 +136,7 @@ Examples: `foo`, `_count`, `value2`
 
 ### Keywords
 ```
-import class new return if else while loop break final
+import class new return if else while loop break final subroutine
 true false
 void int float boolean bool string
 ```
@@ -200,6 +200,79 @@ Rules:
 - `int` values are implicitly converted to `float` when needed (arguments, returns, assignments, array elements).
 
 Top-level functions are file-local and are not callable from other files (including imports). Put shared code inside a class to export it.
+
+---
+
+## Subroutines and threads
+
+`subroutine` declares a function-like entry point that can be started on a background thread.
+
+```gw
+subroutine worker(int id) {
+  print("worker " + string(id));
+}
+
+int tid = worker.start(5);
+Threads.join(tid);
+```
+
+Thread IDs are plain `int` values. GatoLang does not expose handle objects or task objects.
+
+Multiple instances of the same subroutine may run at the same time:
+
+```gw
+subroutine worker(int id) {
+  print(id);
+}
+
+int[] ids = [];
+
+loop(int i : 10) {
+  ids.append(worker.start(i));
+}
+
+loop(int i : ids.length) {
+  Threads.join(ids[i]);
+}
+```
+
+### Thread API
+
+- `subroutineName.start(args...)` -> `int`
+- `Threads.join(id)` -> `void`
+- `Threads.stop(id)` -> `void`
+- `Threads.running(id)` -> `boolean`
+- `Threads.done(id)` -> `boolean`
+- `Threads.shouldStop()` -> `boolean`
+- `Threads.current()` -> `int`
+
+`Threads.stop(id)` is cooperative. It requests that a thread stop; the running subroutine must check `Threads.shouldStop()` and return when appropriate.
+
+```gw
+subroutine worker(int id) {
+  int i = 0;
+  while (!Threads.shouldStop()) {
+    i += 1;
+  }
+  print(i);
+}
+
+int tid = worker.start(1);
+sleep(10);
+Threads.stop(tid);
+Threads.join(tid);
+```
+
+### Threading rules
+
+- Threads share global variables.
+- No automatic locks are added around user data.
+- If multiple threads mutate the same value, the program is responsible for avoiding races.
+- Array and string aliasing semantics are unchanged in threaded programs.
+- The runtime maintains per-thread GC roots for safe managed allocation across threads.
+- `Threads.shouldStop()` is intended to be cheap enough for polling in hot loops.
+
+For performance, `gatoc -O3` can lower proven read-only primitive arrays used by worker subroutines into cached raw data pointers inside the generated C hot loop. This is an internal optimization only; language behavior remains the same.
 
 ---
 
