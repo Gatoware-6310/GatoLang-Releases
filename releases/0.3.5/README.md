@@ -1,28 +1,22 @@
-# GatoLang 0.3.5
+# GatoLang gatoc 0.3.5
 
-This release fixes the GC root corruption that affected class-method encryption workloads.
+## Requirements
+- Java 17
 
-## Contents
+## Linux install
+- System install: run   `sudo bash linux/install.sh`
+- User install: run   `bash linux/install-user.sh`
+  - The script adds `~/.local/bin` to your PATH if needed.
 
-- `SHA256SUMS`
-- `gatoc.jar`
-- `linux/`
-- `linux.zip`
-- `windows/`
-- `windows.zip`
+## Windows install
+- System install (falls back to user install if not writable): run   `windows\install.cmd`
+- User install: run   `windows\install-user.cmd`
+  - The script adds the bin folder to PATH (or tells you to add it).
 
-## Install
+## Verify
+- `gatoc --help`
+- Compile/run a program:
+  `gatoc examples\gc\bubble_sort.gw --run --out out`
 
-Linux user install:
-
-```bash
-cd releases/0.3.5
-bash linux/install-user.sh
-```
-
-Linux system install:
-
-```bash
-cd releases/0.3.5
-sudo bash linux/install.sh
-```
+## Obfuscated jar
+- Releases are obfuscated by default.

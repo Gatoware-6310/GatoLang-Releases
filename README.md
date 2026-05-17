@@ -6,9 +6,16 @@ The compiler is closed source. You may use it to build and distribute programs w
 
 ## Current Release
 
-Current version: `0.3.2`
+GatoLang `0.3.5` fixes the compiler/runtime GC root corruption that affected class-method encryption workloads.
 
-GatoLang `0.3.2` is a performance, correctness, and release-polish update:
+Current version: `0.3.5`
+
+GatoLang `0.3.5` is a correctness and release update:
+- Fixed compiler/runtime GC root handling for class methods, final class fields, and allocation-heavy string workloads.
+- Added `gatoc --version` for install verification.
+- Preserved the earlier `final` class field resolution fix.
+
+GatoLang `0.3.4` was a performance, correctness, and release-polish update:
 - Fixed a critical GC root stack corruption bug where string temporaries and early returns caused memory corruption.
 
 - Fixed `currentTimeMs()` so it reports wall-clock Unix-style milliseconds instead of a monotonic process timer.
@@ -23,7 +30,7 @@ GatoLang `0.3.2` is a performance, correctness, and release-polish update:
 Release files:
 
 ```text
-releases/0.3.2/
+releases/0.3.5/
 +-- README.md
 +-- SHA256SUMS
 +-- linux.zip
@@ -65,21 +72,21 @@ java --version
 
 ## Installation
 
-Download the zip for your platform from `releases/0.3.2`.
+Download the zip for your platform from `releases/0.3.5`.
 
 ### Linux
 
 System install:
 
 ```bash
-cd releases/0.3.2
+cd releases/0.3.5
 sudo bash linux/install.sh
 ```
 
 User install:
 
 ```bash
-cd releases/0.3.2
+cd releases/0.3.5
 bash linux/install-user.sh
 ```
 
@@ -93,14 +100,14 @@ The user install places files under:
 User install:
 
 ```cmd
-cd releases\0.3.2
+cd releases\0.3.5
 windows\install-user.cmd
 ```
 
 System install, with user fallback:
 
 ```cmd
-cd releases\0.3.2
+cd releases\0.3.5
 windows\install.cmd
 ```
 
@@ -122,7 +129,7 @@ print("Hello, GatoLang!");
 gatoc hello.gw --run
 ```
 
-## v0.3.2 Performance Snapshot
+## v0.3.5 Performance Snapshot
 
 Measured on the release preparation machine with GatoLang optimized native builds. Times vary by hardware.
 
@@ -151,7 +158,7 @@ Dense event-processing snapshot:
 Release checksums are in:
 
 ```text
-releases/0.3.2/SHA256SUMS
+releases/0.3.5/SHA256SUMS
 ```
 
 Verify from the release directory:
