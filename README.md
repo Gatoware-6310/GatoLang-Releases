@@ -6,22 +6,23 @@ The compiler is closed source. You may use it to build and distribute programs w
 
 ## Current Release
 
-Current version: `0.3.0`
+Current version: `0.3.1`
 
-GatoLang `0.3.0` is a major performance and multithreading release:
+GatoLang `0.3.1` is a performance, correctness, and release-polish update:
 
-- ID-based multithreading with `subroutine`, `.start(...)`, `Threads.join(id)`, `Threads.stop(id)`, `Threads.running(id)`, `Threads.done(id)`, `Threads.shouldStop()`, and `Threads.current()`.
-- Cooperative thread stopping with low-overhead stop checks.
-- Per-thread GC roots for threaded execution.
-- Raw primitive-buffer lowering and shared read-only primitive array hot-loop optimizations.
-- Scalar replacement and tighter generated C for arrays, strings, classes, loops, and calls.
-- Obfuscated release jars.
-- Benchmarks against C, Python, and Java.
+- Fixed `currentTimeMs()` so it reports wall-clock Unix-style milliseconds instead of a monotonic process timer.
+- Improved byte-heavy generated C by tracking values known to be in byte range.
+- Lowered byte-range `%` and `/` by powers of two into bit operations where semantics are provably identical.
+- Lowered string `.length` directly without an extra runtime helper call.
+- Improved guarded `byteAt(...)` and array access lowering in hot loops.
+- Added real-file dense event parsing benchmarks with threaded C and Zig comparison programs.
+- Kept the ID-based threading API unchanged.
+- Kept release jars obfuscated.
 
 Release files:
 
 ```text
-releases/0.3.0/
+releases/0.3.1/
 +-- README.md
 +-- SHA256SUMS
 +-- linux.zip
@@ -63,21 +64,21 @@ java --version
 
 ## Installation
 
-Download the zip for your platform from `releases/0.3.0`.
+Download the zip for your platform from `releases/0.3.1`.
 
 ### Linux
 
 System install:
 
 ```bash
-cd releases/0.3.0
+cd releases/0.3.1
 sudo bash linux/install.sh
 ```
 
 User install:
 
 ```bash
-cd releases/0.3.0
+cd releases/0.3.1
 bash linux/install-user.sh
 ```
 
@@ -91,14 +92,14 @@ The user install places files under:
 User install:
 
 ```cmd
-cd releases\0.3.0
+cd releases\0.3.1
 windows\install-user.cmd
 ```
 
 System install, with user fallback:
 
 ```cmd
-cd releases\0.3.0
+cd releases\0.3.1
 windows\install.cmd
 ```
 
@@ -120,44 +121,36 @@ print("Hello, GatoLang!");
 gatoc hello.gw --run
 ```
 
-## v0.3.0 Benchmark Snapshot
+## v0.3.1 Performance Snapshot
 
-Measured on the release preparation machine with GatoLang `-O3 --native --lto`. Times vary by hardware.
+Measured on the release preparation machine with GatoLang optimized native builds. Times vary by hardware.
 
 | Workload | GatoLang | C | Python | Java |
 |---|---:|---:|---:|---:|
-| loops_numeric | 48ms | 49ms | 3094ms | 49ms |
-| function_calls | 39ms | 42ms | 1636ms | 37ms |
-| arrays_append | 16ms | 14ms | 335ms | 10ms |
-| string_concat | 19ms | 0ms measured | 4265ms | 1ms |
-| thread_overhead | 35ms | 24ms | 74ms | 81ms |
-| class_access | 14ms | 10ms | 933ms | 8ms |
-| event_scheduler | 11ms | 9ms | 417ms | 9ms |
-| state_machine | 22ms | 16ms | 2166ms | 27ms |
+| loops_numeric | 47ms | 47ms | 3156ms | 66ms |
+| function_calls | 40ms | 39ms | 1691ms | 36ms |
+| arrays_append | 14ms | 12ms | 337ms | 13ms |
+| string_concat | 16ms | 0ms measured | 3956ms | 1ms |
+| thread_overhead | 25ms | 21ms | 73ms | 77ms |
+| class_access | 14ms | 9ms | 897ms | 10ms |
+| event_scheduler | 12ms | 17ms | 434ms | 12ms |
+| state_machine | 21ms | 16ms | 2179ms | 25ms |
 
-Black MIDI/event-processing benchmarks:
+Dense event-processing snapshot:
 
 | Workload | Runtime | Setup | Hot Loop | Events/sec | Hot Events/sec |
 |---|---:|---:|---:|---:|---:|
-| GatoLang black_midi | 434ms | 282ms | 102ms | 46.08M | 196.08M |
-| C black_midi | 366ms | 240ms | 101ms | 54.64M | 198.02M |
-| Python black_midi | 11503ms | 6078ms | 4884ms | 1.74M | 4.10M |
-| Java black_midi | 413ms | 257ms | 155ms | 48.43M | 129.03M |
-| GatoLang parallel | 33ms | 0ms | 26ms | 606.06M | 769.23M |
-| C parallel | 21ms | 0ms | 21ms | 952.38M | 952.38M |
-| Python parallel | 8477ms | 0ms | 8477ms | 2.36M | 2.36M |
-| Java parallel | 44ms | 0ms | 44ms | 454.55M | 454.55M |
-| GatoLang shared parallel | 500ms | 339ms | 117ms | 40.00M | 170.94M |
-| C shared parallel | 334ms | 243ms | 64ms | 59.88M | 312.50M |
-| Python shared parallel | 12065ms | 6205ms | 5306ms | 1.66M | 3.77M |
-| Java shared parallel | 317ms | 241ms | 75ms | 63.09M | 266.67M |
+| GatoLang threaded real-file parser | 691ms | 135ms | 550ms | 180.2M | 226.5M |
+| GatoLang best isolated real-file parser run | 586ms | 97ms | 484ms | 212.5M | 257.3M |
+| C threaded real-file parser | 661ms | 155ms | 505ms | 188.4M | 246.6M |
+| Zig threaded real-file parser | 735ms | 232ms | 503ms | 169.5M | 247.6M |
 
 ## Checksums
 
 Release checksums are in:
 
 ```text
-releases/0.3.0/SHA256SUMS
+releases/0.3.1/SHA256SUMS
 ```
 
 Verify from the release directory:
