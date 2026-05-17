@@ -6,9 +6,10 @@ The compiler is closed source. You may use it to build and distribute programs w
 
 ## Current Release
 
-Current version: `0.3.1`
+Current version: `0.3.2`
 
-GatoLang `0.3.1` is a performance, correctness, and release-polish update:
+GatoLang `0.3.2` is a performance, correctness, and release-polish update:
+- Fixed a critical GC root stack corruption bug where string temporaries and early returns caused memory corruption.
 
 - Fixed `currentTimeMs()` so it reports wall-clock Unix-style milliseconds instead of a monotonic process timer.
 - Improved byte-heavy generated C by tracking values known to be in byte range.
@@ -22,7 +23,7 @@ GatoLang `0.3.1` is a performance, correctness, and release-polish update:
 Release files:
 
 ```text
-releases/0.3.1/
+releases/0.3.2/
 +-- README.md
 +-- SHA256SUMS
 +-- linux.zip
@@ -64,21 +65,21 @@ java --version
 
 ## Installation
 
-Download the zip for your platform from `releases/0.3.1`.
+Download the zip for your platform from `releases/0.3.2`.
 
 ### Linux
 
 System install:
 
 ```bash
-cd releases/0.3.1
+cd releases/0.3.2
 sudo bash linux/install.sh
 ```
 
 User install:
 
 ```bash
-cd releases/0.3.1
+cd releases/0.3.2
 bash linux/install-user.sh
 ```
 
@@ -92,14 +93,14 @@ The user install places files under:
 User install:
 
 ```cmd
-cd releases\0.3.1
+cd releases\0.3.2
 windows\install-user.cmd
 ```
 
 System install, with user fallback:
 
 ```cmd
-cd releases\0.3.1
+cd releases\0.3.2
 windows\install.cmd
 ```
 
@@ -121,7 +122,7 @@ print("Hello, GatoLang!");
 gatoc hello.gw --run
 ```
 
-## v0.3.1 Performance Snapshot
+## v0.3.2 Performance Snapshot
 
 Measured on the release preparation machine with GatoLang optimized native builds. Times vary by hardware.
 
@@ -150,7 +151,7 @@ Dense event-processing snapshot:
 Release checksums are in:
 
 ```text
-releases/0.3.1/SHA256SUMS
+releases/0.3.2/SHA256SUMS
 ```
 
 Verify from the release directory:
